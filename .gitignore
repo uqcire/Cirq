@@ -1,31 +1,28 @@
-# ----------------------------
-# Node & Package Managers
-# ----------------------------
+# -------------------------------------
+# Node & Package Manager
+# -------------------------------------
 node_modules/
-pnpm-lock.yaml
+pnpm-lock.yaml  # Optional: include if you want deterministic installs
 
-# Optional: Keep the lock file if you're using CI or want reproducible builds
-# !pnpm-lock.yaml
-
-# ----------------------------
+# -------------------------------------
 # Vite & Build Artifacts
-# ----------------------------
+# -------------------------------------
 dist/
 .vitepress/dist/
+.temp/
 *.local
 *.cache
-.temp/
-.temp
 
-# ----------------------------
+# -------------------------------------
 # Environment Variables
-# ----------------------------
+# -------------------------------------
 .env
-.env.*            # Includes .env.development, .env.production etc.
+.env.*        # Covers .env.development, .env.production, etc.
+!.env.example # Allow safe template for sharing
 
-# ----------------------------
+# -------------------------------------
 # Editor & System Files
-# ----------------------------
+# -------------------------------------
 *.log
 *.tsbuildinfo
 *.swp
@@ -44,13 +41,18 @@ desktop.ini
 # Linux
 *~
 
-# ----------------------------
-# VSCode & JetBrains
-# ----------------------------
+# -------------------------------------
+# IDE Configs
+# -------------------------------------
 .vscode/
 .idea/
 
-# ----------------------------
-# Other Project-Specific
-# ----------------------------
-stats.html
+# -------------------------------------
+# Git Customization / Personal Files
+# -------------------------------------
+.cursorrules   # Only if not used by your shared tooling
+
+# -------------------------------------
+# Output / Temp Files
+# -------------------------------------
+stats.html     # Build stats output, removed from repo
