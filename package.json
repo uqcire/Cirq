@@ -14,6 +14,7 @@
     "cz": "czg"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.50.0",
     "axios": "^1.9.0",
     "pinia": "^3.0.3",
     "vite": "^6.3.5",
