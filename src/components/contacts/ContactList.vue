@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- 搜索框 -->
-    <div class="mb-4">
-      <input type="text" v-model="searchQuery" placeholder="搜索联系人..." class="input input-bordered w-full" />
-    </div>
-
     <!-- 分组联系人列表 -->
     <div v-if="groupedContacts.length">
       <div v-for="group in groupedContacts" :key="group.letter" class="mb-2">
@@ -34,17 +29,11 @@
 
 <script setup>
 import { useContactsStore } from '@/store/contacts'
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const route = useRoute()
 const contactsStore = useContactsStore()
-const searchQuery = ref(route.query.search || '')
-
-watch(() => route.query.search, (val) => {
-  searchQuery.value = val || ''
-})
 
 // 获取姓名首字母
 function getInitials(contact) {
@@ -55,22 +44,7 @@ function getInitials(contact) {
 
 // 过滤和分组联系人
 const groupedContacts = computed(() => {
-  // 先过滤
   let filtered = contactsStore.contacts
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(contact => {
-      const fields = [
-        contact.first_name,
-        contact.last_name,
-        contact.company,
-        contact.phone,
-        contact.email,
-        ...(contact.tags || [])
-      ].filter(Boolean).map(f => f.toLowerCase())
-      return fields.some(f => f.includes(query))
-    })
-  }
   // 分组
   const groups = {}
   filtered.forEach(contact => {
