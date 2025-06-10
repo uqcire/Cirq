@@ -8,36 +8,17 @@
       <span>{{ error }}</span>
     </div>
 
-    <div v-else-if="contact" class="max-w-4xl mx-auto">
-
+    <div v-else-if="contact" class="w-full mx-auto">
       <!-- 使用ContactCard组件展示联系人详细信息 -->
-      <ContactCard :contact="contact" @edit="handleEdit" @delete="handleDelete" />
-
-      <!-- 编辑表单弹窗 -->
-      <div v-if="showForm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative">
-          <button class="btn btn-sm btn-circle absolute right-2 top-2" @click="closeForm">
-            ✕
-          </button>
-          <ContactForm :initial-data="editingContact" :loading="contactsStore.loading" @submit="handleSubmit"
-            @cancel="closeForm" />
-        </div>
-      </div>
-    </div>
-
-    <div v-else class="text-center p-8">
-      <div class="text-gray-500">未找到联系人</div>
-      <button class="btn btn-primary mt-4" @click="$router.push('/contacts')">
-        返回列表
-      </button>
+      <ContactCard :contact="contact" @edit="handleEdit" @delete="handleDelete" @update="handleUpdateField" />
     </div>
   </div>
 </template>
 
 <script setup>
 import ContactCard from '@/components/contacts/ContactCard.vue'
-import ContactForm from '@/components/contacts/ContactForm.vue'
 import { useContactsStore } from '@/store/contacts'
+import { supabase } from '@/store/supabase'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -48,8 +29,6 @@ const contactsStore = useContactsStore()
 const loading = ref(true)
 const error = ref(null)
 const contact = ref(null)
-const showForm = ref(false)
-const editingContact = ref(null)
 
 // 获取联系人详情
 async function fetchContact() {
@@ -57,10 +36,14 @@ async function fetchContact() {
   error.value = null
   try {
     const contactId = route.params.id
-    const contactData = await contactsStore.getContactById(contactId)
-    if (contactData) {
-      contact.value = contactData
-    }
+    // 每次都从Supabase拉取最新数据
+    const { data, error: fetchError } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('id', contactId)
+      .single()
+    if (fetchError) throw fetchError
+    contact.value = data
   } catch (e) {
     error.value = '加载联系人失败'
     console.error(e)
@@ -71,21 +54,7 @@ async function fetchContact() {
 
 // 处理编辑
 function handleEdit() {
-  editingContact.value = {
-    id: contact.value.id,
-    firstName: contact.value.first_name,
-    lastName: contact.value.last_name,
-    company: contact.value.company,
-    phone: contact.value.phone,
-    email: contact.value.email,
-    address: contact.value.address,
-    birthday: contact.value.birthday,
-    socialProfiles: contact.value.social_profiles,
-    tags: contact.value.tags,
-    customFields: contact.value.custom_fields,
-    notes: contact.value.notes
-  }
-  showForm.value = true
+  // 这里可以实现跳转到编辑页面或弹窗
 }
 
 // 处理删除
@@ -100,21 +69,17 @@ async function handleDelete() {
   }
 }
 
-// 处理表单提交
-async function handleSubmit(formData) {
-  try {
-    await contactsStore.updateContact(contact.value.id, formData)
-    await fetchContact()
-    closeForm()
-  } catch (e) {
-    console.error('更新联系人失败:', e)
+// 处理行内编辑保存
+async function handleUpdateField({ field, value }) {
+  if (!contact.value) return
+  if (field === 'name') {
+    await contactsStore.updateContact(contact.value.id, value)
+    contact.value = { ...contact.value, first_name: value.firstName, last_name: value.lastName }
+  } else {
+    await contactsStore.updateContact(contact.value.id, { [field]: value })
+    contact.value = { ...contact.value, [field]: value }
   }
-}
-
-// 关闭表单
-function closeForm() {
-  showForm.value = false
-  editingContact.value = null
+  await fetchContact()
 }
 
 onMounted(fetchContact)

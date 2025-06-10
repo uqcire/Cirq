@@ -163,5 +163,21 @@ export const useContactsStore = defineStore('contacts', {
         this.loading = false
       }
     },
+
+    async addNote(contactId, note) {
+      const contact = this.getContactById(contactId)
+      if (!contact) throw new Error('Contact not found')
+      const notes = Array.isArray(contact.notes) ? [...contact.notes] : []
+      notes.push(note)
+      const { data, error } = await supabase
+        .from('contacts')
+        .update({ notes })
+        .eq('id', contactId)
+        .select()
+      if (error) throw error
+      const idx = this.contacts.findIndex(c => c.id === contactId)
+      if (idx !== -1) this.contacts[idx] = data[0]
+      return data[0]
+    },
   },
 })

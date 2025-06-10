@@ -10,3 +10,4 @@ setupRouter(app)
 setupStore(app)
 
 app.mount('#app')
+
