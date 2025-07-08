@@ -72,6 +72,10 @@ async function handleDelete() {
 // 处理行内编辑保存
 async function handleUpdateField({ field, value }) {
   if (!contact.value) return
+  if (field === 'refresh') {
+    await fetchContact()
+    return
+  }
   if (field === 'name') {
     await contactsStore.updateContact(contact.value.id, value)
     contact.value = { ...contact.value, first_name: value.firstName, last_name: value.lastName }

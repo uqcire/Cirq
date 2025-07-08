@@ -217,7 +217,7 @@
           <div class="font-semibold text-sm mb-1">Birthday</div>
           <div class="bg-white rounded px-2 py-1 border text-xs">{{ contact.birthday ? formatDate(contact.birthday) :
             '无'
-            }}</div>
+          }}</div>
         </div>
         <!-- website -->
         <div>
